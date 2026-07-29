@@ -1,0 +1,51 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostRow from "../components/PostRow.astro";
+import { getCategories, getPosts } from "../lib/wordpress";
+const posts = await getPosts();
+const categories = await getCategories();
+const featured = posts[0];
+const recent = posts.slice(1);
+---
+<BaseLayout>
+  <main id="top">
+    <section class="intro">
+      <p class="eyebrow">একটি ব্যক্তিগত বাংলা জার্নাল · ঢাকা থেকে</p>
+      <h1>যা দেখি, যা পড়ি,<br><em>যা মনে থেকে যায়।</em></h1>
+      <p class="lede">শহর, নকশা, বই আর দূরের পথ নিয়ে ধীর গতির লেখা। কোনো অ্যালগরিদম নেই—শুধু কৌতূহল আর নোটবুকের পাতা।</p>
+      <div class="intro-meta"><a class="primary-link" href="#লেখা">সাম্প্রতিক লেখা <span>↓</span></a><span>প্রতি দুই সপ্তাহে নতুন লেখা</span></div>
+    </section>
+
+    {featured && <>
+      <div class="rule"><span>নির্বাচিত লেখা</span></div>
+      <article class="featured" data-search-item data-title={featured.title} data-category={featured.category.name}>
+        <div class="feature-index" aria-hidden="true">০১</div>
+        <div class="feature-copy">
+          <p class="kicker">{featured.category.name} · {featured.readingMinutes} মিনিটের পাঠ</p>
+          <h2><a href={`/blog/${featured.slug}/`}>{featured.title}</a></h2>
+          <p>{featured.excerpt}</p>
+          <a class="read-more" href={`/blog/${featured.slug}/`}>পুরো লেখাটি পড়ুন <span>→</span></a>
+        </div>
+        {featured.image
+          ? <figure class="feature-art"><img src={featured.image} alt={featured.imageAlt || featured.title} loading="eager"></figure>
+          : <figure class="feature-art abstract-art" aria-label="পুরান ঢাকার বারান্দার বিমূর্ত রেখাচিত্র"><div class="sun"></div><div class="building one"></div><div class="building two"></div><div class="building three"></div></figure>}
+      </article>
+    </>}
+
+    <section class="content-grid">
+      <div id="লেখা" class="archive">
+        <div class="section-heading"><h2>সাম্প্রতিক লেখা</h2><span>{new Date().getFullYear()}</span></div>
+        <div class="post-list">
+          {recent.map((post, index) => <PostRow post={post} index={index + 1} />)}
+        </div>
+        <a class="all-posts" href="#লেখা">সব লেখা দেখুন <span>{posts.length}টি লেখা</span></a>
+      </div>
+      <aside id="বিষয়" class="sidebar">
+        <section class="sidebar-block"><h3>বিষয় অনুযায়ী</h3><ul>
+          {categories.map((category) => <li><a href={`/category/${category.slug}/`}>{category.name}<span>{category.count}</span></a></li>)}
+        </ul></section>
+        <section class="sidebar-block note"><span class="stamp">ন</span><h3>এই খাতার লেখক</h3><p>আমি আরিফ—নকশা করি, শহর দেখি, আর ভুলে যাওয়ার আগে ছোট ছোট কথা লিখে রাখি।</p><a href="/about/">আরও পরিচয় →</a></section>
+      </aside>
+    </section>
+  </main>
+</BaseLayout>

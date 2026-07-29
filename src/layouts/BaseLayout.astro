@@ -1,0 +1,68 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/global.css";
+interface Props { title?: string; description?: string; image?: string }
+const {
+  title = "নীলখাতা — ভাবনা, ভ্রমণ ও প্রতিদিন",
+  description = "শহর, নকশা, বই আর দূরের পথ নিয়ে একটি ব্যক্তিগত বাংলা জার্নাল।",
+  image,
+} = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content={description}>
+    <link rel="canonical" href={canonical}>
+    <meta property="og:title" content={title}>
+    <meta property="og:description" content={description}>
+    <meta property="og:url" content={canonical}>
+    <meta property="og:type" content="website">
+    {image && <meta property="og:image" content={image}>}
+    <title>{title}</title>
+  </head>
+  <body>
+    <div class="site-shell">
+      <Header />
+      <slot />
+      <Footer />
+    </div>
+    <script>
+      const menu = document.querySelector(".menu-button");
+      const nav = document.querySelector(".nav");
+      menu?.addEventListener("click", () => {
+        const open = nav?.classList.toggle("open") ?? false;
+        menu.setAttribute("aria-expanded", String(open));
+        menu.textContent = open ? "বন্ধ করুন" : "সূচি";
+      });
+      const panel = document.querySelector("#search-panel");
+      const searchToggle = document.querySelector(".search-toggle");
+      const searchClose = document.querySelector(".search-close");
+      const searchInput = document.querySelector<HTMLInputElement>("#site-search");
+      const results = document.querySelector<HTMLElement>("#search-results");
+      const items = [...document.querySelectorAll<HTMLElement>("[data-search-item]")];
+      const openSearch = () => { panel?.removeAttribute("hidden"); searchToggle?.setAttribute("aria-expanded", "true"); setTimeout(() => searchInput?.focus(), 0); };
+      const closeSearch = () => { panel?.setAttribute("hidden", ""); searchToggle?.setAttribute("aria-expanded", "false"); };
+      searchToggle?.addEventListener("click", openSearch);
+      searchClose?.addEventListener("click", closeSearch);
+      document.addEventListener("keydown", (event) => {
+        if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); openSearch(); }
+        if (event.key === "Escape") closeSearch();
+      });
+      searchInput?.addEventListener("input", () => {
+        const query = searchInput.value.trim().toLocaleLowerCase("bn");
+        const matches = items.filter((item) => `${item.dataset.title} ${item.dataset.category}`.toLocaleLowerCase("bn").includes(query)).slice(0, 8);
+        if (results) results.innerHTML = query ? (matches.length ? matches.map((item) => `<a href="${item.querySelector("a")?.getAttribute("href")}"><strong>${item.dataset.title}</strong><small>${item.dataset.category}</small></a>`).join("") : "<p>কোনো লেখা পাওয়া যায়নি।</p>") : "";
+      });
+      const newsletterForm = document.querySelector<HTMLFormElement>("[data-newsletter-form]");
+      newsletterForm?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const message = newsletterForm.querySelector<HTMLElement>(".form-message");
+        if (message) message.textContent = "ধন্যবাদ! Newsletter service যুক্ত হলে এখান থেকেই সদস্যতা সম্পন্ন হবে।";
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+---
+import type { Post } from "../lib/wordpress";
+interface Props { post: Post; index: number }
+const { post, index } = Astro.props;
+const date = new Intl.DateTimeFormat("bn-BD", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(post.date));
+---
+<article class="post-row" data-search-item data-title={post.title} data-category={post.category.name}>
+  <span class="post-number">{String(index).padStart(2, "0")}</span>
+  <div class="post-main"><h3><a href={`/blog/${post.slug}/`}>{post.title}</a></h3><small>{post.category.name} · {post.readingMinutes} মিনিট</small></div>
+  <time datetime={post.date}>{date}</time>
+  <a class="arrow" href={`/blog/${post.slug}/`} aria-label={`${post.title} পড়ুন`}>↗</a>
+</article>

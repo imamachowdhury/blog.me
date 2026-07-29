@@ -1,0 +1,25 @@
+---
+const path = Astro.url.pathname;
+---
+<header class="topbar">
+  <a class="wordmark" href="/" aria-label="নীলখাতা — প্রথম পাতায় যান">
+    <span class="mark" aria-hidden="true">ন</span>
+    <span><strong>নীলখাতা</strong><small>ভাবনা, ভ্রমণ ও প্রতিদিন</small></span>
+  </a>
+  <button class="menu-button" type="button" aria-controls="main-nav" aria-expanded="false">সূচি</button>
+  <nav id="main-nav" class="nav" aria-label="প্রধান নেভিগেশন">
+    <a class:list={{ active: path === "/" }} href="/#লেখা">লেখা</a>
+    <a href="/#বিষয়">বিষয়</a>
+    <a class:list={{ active: path === "/about/" }} href="/about/">পরিচয়</a>
+    <a href="#চিঠি">চিঠি</a>
+  </nav>
+  <button class="search-toggle" type="button" aria-controls="search-panel" aria-expanded="false">খুঁজুন… <kbd>⌘ K</kbd></button>
+</header>
+<div id="search-panel" class="search-panel" hidden>
+  <div class="search-box">
+    <label for="site-search">লেখা খুঁজুন</label>
+    <input id="site-search" type="search" placeholder="শিরোনাম বা বিষয় লিখুন…" autocomplete="off">
+    <button class="search-close" type="button" aria-label="অনুসন্ধান বন্ধ করুন">×</button>
+    <div id="search-results" aria-live="polite"></div>
+  </div>
+</div>
