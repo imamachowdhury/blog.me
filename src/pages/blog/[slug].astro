@@ -1,10 +1,11 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getPosts } from "../../lib/wordpress";
+import { getPosts, normalizeSlug } from "../../lib/wordpress";
 
 Astro.response.headers.set("Cache-Control", "public, max-age=60, s-maxage=60");
 const posts = await getPosts();
-const post = posts.find((item) => item.slug === Astro.params.slug);
+const requestedSlug = normalizeSlug(Astro.params.slug);
+const post = posts.find((item) => normalizeSlug(item.slug) === requestedSlug);
 if (!post) return Astro.redirect("/404", 302);
 const date = new Intl.DateTimeFormat("bn-BD", { day: "numeric", month: "long", year: "numeric" }).format(new Date(post.date));
 ---

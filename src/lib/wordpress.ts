@@ -58,6 +58,13 @@ const demoPosts: Post[] = [
 const defaultApiUrl = "https://blog.imamahmed.net/wp-json/wp/v2";
 const apiUrl = (import.meta.env.WORDPRESS_API_URL || defaultApiUrl).replace(/\/$/, "");
 const clean = (value = "") => value.replace(/<[^>]+>/g, "").replace(/&hellip;/g, "…").replace(/&#8217;/g, "’").trim();
+export const normalizeSlug = (value = "") => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};
 
 function mapPost(item: any): Post {
   const embedded = item._embedded || {};
@@ -67,7 +74,7 @@ function mapPost(item: any): Post {
   const text = clean(item.content?.rendered);
   return {
     id: item.id,
-    slug: item.slug,
+    slug: normalizeSlug(item.slug),
     title: clean(item.title?.rendered),
     excerpt: clean(item.excerpt?.rendered),
     content: item.content?.rendered || "",
