@@ -1,18 +1,13 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostRow from "../../components/PostRow.astro";
-import { getCategories, getPosts, type Category, type Post } from "../../lib/wordpress";
+import { getCategories, getPosts } from "../../lib/wordpress";
 
-export async function getStaticPaths() {
-  const [posts, categories] = await Promise.all([getPosts(), getCategories()]);
-  return categories.map((category) => ({
-    params: { slug: category.slug },
-    props: { category, posts: posts.filter((post) => post.category.slug === category.slug) },
-  }));
-}
-
-interface Props { category: Category; posts: Post[] }
-const { category, posts } = Astro.props;
+Astro.response.headers.set("Cache-Control", "public, max-age=60, s-maxage=60");
+const [allPosts, categories] = await Promise.all([getPosts(), getCategories()]);
+const category = categories.find((item) => item.slug === Astro.params.slug);
+if (!category) return Astro.redirect("/404", 302);
+const posts = allPosts.filter((post) => post.category.slug === category.slug);
 ---
 <BaseLayout title={`${category.name} — নীলখাতা`} description={`${category.name} বিষয়ের সকল লেখা`}>
   <main id="top" class="listing">

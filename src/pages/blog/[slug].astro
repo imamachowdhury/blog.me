@@ -1,14 +1,11 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getPosts, type Post } from "../../lib/wordpress";
+import { getPosts } from "../../lib/wordpress";
 
-export async function getStaticPaths() {
-  const posts = await getPosts();
-  return posts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
-}
-
-interface Props { post: Post }
-const { post } = Astro.props;
+Astro.response.headers.set("Cache-Control", "public, max-age=60, s-maxage=60");
+const posts = await getPosts();
+const post = posts.find((item) => item.slug === Astro.params.slug);
+if (!post) return Astro.redirect("/404", 302);
 const date = new Intl.DateTimeFormat("bn-BD", { day: "numeric", month: "long", year: "numeric" }).format(new Date(post.date));
 ---
 <BaseLayout title={`${post.title} — নীলখাতা`} description={post.excerpt} image={post.image}>

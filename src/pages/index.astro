@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostRow from "../components/PostRow.astro";
 import { getCategories, getPosts } from "../lib/wordpress";
+Astro.response.headers.set("Cache-Control", "public, max-age=60, s-maxage=60");
 const posts = await getPosts();
 const categories = await getCategories();
 const featured = posts[0];

@@ -1,7 +1,9 @@
 import { defineConfig } from "astro/config";
+import cloudflare from "@astrojs/cloudflare";
 
 export default defineConfig({
-  output: "static",
+  output: "server",
+  adapter: cloudflare(),
   site: process.env.SITE_URL || "https://blog.imamahmed.net",
   build: { format: "directory" },
 });
