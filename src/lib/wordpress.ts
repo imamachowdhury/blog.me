@@ -55,7 +55,8 @@ const demoPosts: Post[] = [
   },
 ];
 
-const apiUrl = import.meta.env.WORDPRESS_API_URL?.replace(/\/$/, "");
+const defaultApiUrl = "https://blog.imamahmed.net/wp-json/wp/v2";
+const apiUrl = (import.meta.env.WORDPRESS_API_URL || defaultApiUrl).replace(/\/$/, "");
 const clean = (value = "") => value.replace(/<[^>]+>/g, "").replace(/&hellip;/g, "…").replace(/&#8217;/g, "’").trim();
 
 function mapPost(item: any): Post {
@@ -80,24 +81,23 @@ function mapPost(item: any): Post {
 }
 
 export async function getPosts(): Promise<Post[]> {
-  if (!apiUrl) return demoPosts;
   try {
     const response = await fetch(`${apiUrl}/posts?per_page=100&_embed=1`);
     if (!response.ok) throw new Error(`WordPress returned ${response.status}`);
     return (await response.json()).map(mapPost);
   } catch (error) {
-    console.warn("WordPress is unavailable; building with demo content.", error);
-    return demoPosts;
+    if (import.meta.env.DEV && !import.meta.env.WORDPRESS_API_URL) return demoPosts;
+    throw new Error(`Could not load WordPress posts from ${apiUrl}`, { cause: error });
   }
 }
 
 export async function getCategories(): Promise<Category[]> {
-  if (!apiUrl) return demoCategories;
   try {
     const response = await fetch(`${apiUrl}/categories?per_page=100&hide_empty=true`);
     if (!response.ok) throw new Error(`WordPress returned ${response.status}`);
     return await response.json();
-  } catch {
-    return demoCategories;
+  } catch (error) {
+    if (import.meta.env.DEV && !import.meta.env.WORDPRESS_API_URL) return demoCategories;
+    throw new Error(`Could not load WordPress categories from ${apiUrl}`, { cause: error });
   }
 }
