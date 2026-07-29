@@ -1,0 +1,22 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getPages, normalizeSlug } from "../lib/wordpress";
+
+Astro.response.headers.set("Cache-Control", "public, max-age=60, s-maxage=60");
+const requestedSlug = normalizeSlug(Astro.params.slug);
+const pages = await getPages();
+const page = pages.find((item) => normalizeSlug(item.slug) === requestedSlug);
+if (!page) return Astro.redirect("/404", 302);
+---
+<BaseLayout title={`${page.title} — নীলখাতা`} description={page.excerpt}>
+  <main id="top">
+    <article class="article">
+      <header class="article-header">
+        <p class="kicker">পৃষ্ঠা</p>
+        <h1>{page.title}</h1>
+        {page.excerpt && <p class="article-excerpt">{page.excerpt}</p>}
+      </header>
+      <div class="article-content" set:html={page.content}></div>
+    </article>
+  </main>
+</BaseLayout>

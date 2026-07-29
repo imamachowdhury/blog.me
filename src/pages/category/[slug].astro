@@ -1,11 +1,12 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostRow from "../../components/PostRow.astro";
-import { getCategories, getPosts } from "../../lib/wordpress";
+import { getCategories, getPosts, normalizeSlug } from "../../lib/wordpress";
 
 Astro.response.headers.set("Cache-Control", "public, max-age=60, s-maxage=60");
 const [allPosts, categories] = await Promise.all([getPosts(), getCategories()]);
-const category = categories.find((item) => item.slug === Astro.params.slug);
+const requestedSlug = normalizeSlug(Astro.params.slug);
+const category = categories.find((item) => normalizeSlug(item.slug) === requestedSlug);
 if (!category) return Astro.redirect("/404", 302);
 const posts = allPosts.filter((post) => post.category.slug === category.slug);
 ---

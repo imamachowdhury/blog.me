@@ -14,6 +14,15 @@ export type Post = {
   readingMinutes: number;
 };
 
+export type Page = {
+  id: number;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  date: string;
+};
+
 const demoCategories: Category[] = [
   { id: 1, name: "নগর ও স্মৃতি", slug: "city-memory", count: 12 },
   { id: 2, name: "নকশা", slug: "design", count: 8 },
@@ -79,7 +88,7 @@ function mapPost(item: any): Post {
     excerpt: clean(item.excerpt?.rendered),
     content: item.content?.rendered || "",
     date: item.date,
-    category: term ? { id: term.id, name: term.name, slug: term.slug, count: term.count || 0 } : { id: 0, name: "লেখা", slug: "writing", count: 0 },
+    category: term ? { id: term.id, name: term.name, slug: normalizeSlug(term.slug), count: term.count || 0 } : { id: 0, name: "লেখা", slug: "writing", count: 0 },
     image: media?.source_url,
     imageAlt: media?.alt_text,
     author: author?.name || "লেখক",
@@ -100,11 +109,29 @@ export async function getPosts(): Promise<Post[]> {
 
 export async function getCategories(): Promise<Category[]> {
   try {
-    const response = await fetch(`${apiUrl}/categories?per_page=100&hide_empty=true`);
+    const response = await fetch(`${apiUrl}/categories?per_page=100&hide_empty=false`);
     if (!response.ok) throw new Error(`WordPress returned ${response.status}`);
-    return await response.json();
+    const categories: Category[] = await response.json();
+    return categories.map((category) => ({
+      ...category,
+      slug: normalizeSlug(category.slug),
+    }));
   } catch (error) {
     if (import.meta.env.DEV && !import.meta.env.WORDPRESS_API_URL) return demoCategories;
     throw new Error(`Could not load WordPress categories from ${apiUrl}`, { cause: error });
   }
+}
+
+export async function getPages(): Promise<Page[]> {
+  const response = await fetch(`${apiUrl}/pages?per_page=100&status=publish`);
+  if (!response.ok) throw new Error(`WordPress returned ${response.status}`);
+  const pages: any[] = await response.json();
+  return pages.map((page) => ({
+    id: page.id,
+    slug: normalizeSlug(page.slug),
+    title: clean(page.title?.rendered),
+    excerpt: clean(page.excerpt?.rendered),
+    content: page.content?.rendered || "",
+    date: page.modified || page.date,
+  }));
 }
